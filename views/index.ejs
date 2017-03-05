@@ -1,0 +1,59 @@
+<head>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+</head>
+
+<body>
+    <div id="player"></div>
+    <script>
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        var player;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '390'
+                , width: '640'
+                , videoId: 'Z5ezsReZcxU'
+                , events: {
+                    'onReady': onPlayerReady
+                    , 'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+        var done = false;
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING && !done) {
+                setTimeout(stopVideo, 6000);
+                done = true;
+            }
+        }
+
+        function stopVideo() {
+            player.stopVideo();
+        }
+
+        function seek() {
+            $.get("/seek", {
+                website: "youtube"
+                , videoid: "Z5ezsReZcxU"
+            }).done(function (data) {
+                console.log(data);
+                var ret = JSON.parse(data);
+                var serverTime = parseInt(ret.date);
+                var clientTime = new Date().getTime();
+                var delay = clientTime - serverTime;
+                var seek = parseInt(ret.currentTime) - delay;
+                player.seekTo(seek / 1000);
+            });
+        }
+        //var apiKey = "AIzaSyDSm23IlFZInjpmtauRNi_tz-z0Pf1ygd0";
+        //setInterval(seek, 5000);
+    </script>
+</body>
